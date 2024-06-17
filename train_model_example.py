@@ -16,6 +16,13 @@ DATASET_IMAGES = pathlib.Path('datasets/PCB_DATASET/images')
 
 # MY
 
+def custom_mapping_function(image, label):
+    def calc(v):
+        return calculate(v, 16)
+    res = calc(image)
+    print(res)
+    return res, label
+
 batch_size = 32
 img_height = 180
 img_width = 180
@@ -27,19 +34,8 @@ train_ds = tf.keras.utils.image_dataset_from_directory(
     seed=SEED,
     # image_size=(img_height, img_width),
     batch_size=batch_size
-)
+).map(custom_mapping_function)
 
-
-def custom_mapping_function(image, label):
-    def calc(v):
-        return calculate(v, 16)
-    res = calc(image)
-    print(res)
-    return res, label
-
-
-# Apply the custom mapping function to each image in the dataset
-mapped_dataset = train_ds.map(custom_mapping_function)
 
 val_ds = tf.keras.utils.image_dataset_from_directory(
     DATASET_IMAGES,
@@ -48,7 +44,7 @@ val_ds = tf.keras.utils.image_dataset_from_directory(
     seed=SEED,
     # image_size=(img_height, img_width),
     batch_size=batch_size
-)
+).map(custom_mapping_function)
 
 class_names = train_ds.class_names
 print(class_names)
@@ -97,6 +93,7 @@ model = tf.keras.Sequential([
 model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
+
 
 model.fit(train_images, train_labels, epochs=10)
 
